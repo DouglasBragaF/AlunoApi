@@ -1,0 +1,6 @@
+@AlunoApi.Api_HostAddress = http://localhost:5074
+
+GET {{AlunoApi.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

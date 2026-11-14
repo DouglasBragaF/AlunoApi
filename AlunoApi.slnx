@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="AlunoApi.Api/AlunoApi.Api.csproj" />
+  <Project Path="AlunoApi.Application/AlunoApi.Application.csproj" />
+  <Project Path="AlunoApi.Domain/AlunoApi.Domain.csproj" />
+  <Project Path="AlunoApi.Infrastructure/AlunoApi.Infrastructure.csproj" />
+  <Project Path="AlunoApi.Tests/AlunoApi.Tests.csproj" />
+</Solution>

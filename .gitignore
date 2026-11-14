@@ -1,0 +1,35 @@
+# Visual Studio
+.vs/
+*.user
+*.suo
+
+# Build
+bin/
+obj/
+
+# Testes
+TestResults/
+.coverage/
+coverage/
+
+# Segredos e ambiente local
+.env
+secrets.json
+
+# Certificados e chaves
+*.pfx
+*.key
+*.pem
+*.crt
+
+# Front-end
+node_modules/
+dist/
+.vite/
+
+# Logs
+*.log
+
+# Sistema operacional
+.DS_Store
+Thumbs.db

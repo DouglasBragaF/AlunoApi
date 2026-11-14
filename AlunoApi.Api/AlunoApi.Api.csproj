@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>20983a10-b742-4c7d-a0cc-455f33f6e163</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.12" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AlunoApi.Application\AlunoApi.Application.csproj" />
+    <ProjectReference Include="..\AlunoApi.Infrastructure\AlunoApi.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>

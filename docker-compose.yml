@@ -1,0 +1,20 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: alunoapi-postgres
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - alunoapi_postgres_data:/var/lib/postgresql/data
+      - ./AlunoApi.Infrastructure/Database:/docker-entrypoint-initdb.d:ro
+
+volumes:
+  alunoapi_postgres_data:
