@@ -3,6 +3,6 @@
 public interface ICpfProtector
 {
     ProtectedCpf Proteger(global::Cpf cpf);
-
     global::Cpf Desproteger(byte[] cpfCifrado);
+    byte[] CalcularHash(global::Cpf cpf);
 }

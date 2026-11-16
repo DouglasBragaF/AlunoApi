@@ -147,4 +147,47 @@ public sealed class AlunoRepositoryTests
         await Assert.ThrowsAsync<DomainException>(
             () => repository.ObterProximaSequenciaMatriculaAsync(ano));
     }
+    [Fact]
+    public async Task Deve_identificar_CPF_de_aluno_ja_cadastrado()
+    {
+        await _fixture.LimparBancoAsync();
+
+        var protector = TestCpfProtectorFactory.Criar();
+        await using var context = _fixture.CreateContext();
+        var repository = new AlunoRepository(context, protector);
+        var cpf = Cpf.Criar("52998224725");
+
+        Assert.False(await repository.ExisteCpfAsync(cpf));
+
+        await repository.AdicionarAsync(CriarAluno(cpf.Valor, sequencia: 1));
+
+        Assert.True(await repository.ExisteCpfAsync(cpf));
+    }
+
+    [Fact]
+    public async Task Deve_rejeitar_aluno_com_CPF_duplicado()
+    {
+        await _fixture.LimparBancoAsync();
+
+        var protector = TestCpfProtectorFactory.Criar();
+        await using var context = _fixture.CreateContext();
+        var repository = new AlunoRepository(context, protector);
+        const string cpf = "52998224725";
+
+        await repository.AdicionarAsync(CriarAluno(cpf, sequencia: 1));
+
+        await Assert.ThrowsAsync<DomainException>(
+            () => repository.AdicionarAsync(CriarAluno(cpf, sequencia: 2)));
+    }
+
+    private static Aluno CriarAluno(string cpf, int sequencia)
+    {
+        return Aluno.Criar(
+            nome: "Aluno Teste",
+            dataNascimento: new DateOnly(1990, 1, 1),
+            documento: Documento.Criar(cpf),
+            matricula: Matricula.Criar(2026, sequencia),
+            responsaveisIds: [],
+            hoje: new DateOnly(2026, 1, 1));
+    }
 }

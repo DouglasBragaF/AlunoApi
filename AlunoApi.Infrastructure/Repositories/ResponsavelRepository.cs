@@ -1,5 +1,6 @@
 ﻿using AlunoApi.Application.Security;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 
 namespace AlunoApi.Infrastructure.Repositories;
 
@@ -28,12 +29,16 @@ public sealed class ResponsavelRepository : IResponsavelRepository
     }
 
     public async Task AdicionarAsync(
-        Responsavel responsavel,
-        CancellationToken ct = default)
+    Responsavel responsavel,
+    CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(responsavel);
 
         var cpfProtegido = _cpfProtector.Proteger(responsavel.Cpf);
+
+        if (await CpfHashExisteAsync(cpfProtegido.Hash, ct))
+            throw new DomainException(
+                "Já existe um responsável cadastrado com este CPF.");
 
         var registro = new ResponsavelPersistence
         {
@@ -44,7 +49,17 @@ public sealed class ResponsavelRepository : IResponsavelRepository
         };
 
         _context.Responsaveis.Add(registro);
-        await _context.SaveChangesAsync(ct);
+
+        try
+        {
+            await _context.SaveChangesAsync(ct);
+        }
+        catch (DbUpdateException ex) when (
+            ViolacaoDeUnicidadeCpf(ex, "uq_responsaveis_cpf_hash"))
+        {
+            throw new DomainException(
+                "Já existe um responsável cadastrado com este CPF.");
+        }
     }
 
     private Responsavel ParaDominio(ResponsavelPersistence registro)
@@ -55,5 +70,33 @@ public sealed class ResponsavelRepository : IResponsavelRepository
             id: registro.Id,
             nome: registro.Nome,
             cpf: cpf);
+    }
+
+    public Task<bool> ExisteCpfAsync(
+    Cpf cpf,
+    CancellationToken ct = default)
+    {
+        ArgumentNullException.ThrowIfNull(cpf);
+
+        var hash = _cpfProtector.CalcularHash(cpf);
+        return CpfHashExisteAsync(hash, ct);
+    }
+
+    private Task<bool> CpfHashExisteAsync(
+    byte[] hash,
+    CancellationToken ct)
+    {
+        return _context.Responsaveis
+            .AsNoTracking()
+            .AnyAsync(x => x.CpfHash == hash, ct);
+    }
+
+    private static bool ViolacaoDeUnicidadeCpf(
+        DbUpdateException exception,
+        string constraintName)
+    {
+        return exception.InnerException is PostgresException postgresException
+            && postgresException.SqlState == PostgresErrorCodes.UniqueViolation
+            && postgresException.ConstraintName == constraintName;
     }
 }

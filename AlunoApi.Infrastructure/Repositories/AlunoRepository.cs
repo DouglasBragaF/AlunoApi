@@ -2,6 +2,7 @@
 using AlunoApi.Application.Security;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
+using Npgsql;
 
 namespace AlunoApi.Infrastructure.Repositories;
 
@@ -84,12 +85,16 @@ public sealed class AlunoRepository : IAlunoRepository
     }
 
     public async Task AdicionarAsync(
-        Aluno aluno,
-        CancellationToken ct = default)
+    Aluno aluno,
+    CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(aluno);
 
         var cpfProtegido = _cpfProtector.Proteger(aluno.Documento.Cpf);
+
+        if (await CpfHashExisteAsync(cpfProtegido.Hash, ct))
+            throw new DomainException(
+                "Já existe um aluno cadastrado com este CPF.");
 
         var registro = new AlunoPersistence
         {
@@ -113,7 +118,35 @@ public sealed class AlunoRepository : IAlunoRepository
         };
 
         _context.Alunos.Add(registro);
-        await _context.SaveChangesAsync(ct);
+
+        try
+        {
+            await _context.SaveChangesAsync(ct);
+        }
+        catch (DbUpdateException ex) when (
+            ViolacaoDeUnicidadeCpf(ex, "uq_alunos_cpf_hash"))
+        {
+            throw new DomainException(
+                "Já existe um aluno cadastrado com este CPF.");
+        }
+    }
+
+    private Task<bool> CpfHashExisteAsync(
+        byte[] hash,
+        CancellationToken ct)
+    {
+        return _context.Alunos
+            .AsNoTracking()
+            .AnyAsync(x => x.CpfHash == hash, ct);
+    }
+
+    private static bool ViolacaoDeUnicidadeCpf(
+        DbUpdateException exception,
+        string constraintName)
+    {
+        return exception.InnerException is PostgresException postgresException
+            && postgresException.SqlState == PostgresErrorCodes.UniqueViolation
+            && postgresException.ConstraintName == constraintName;
     }
 
     private Aluno ParaDominio(AlunoPersistence registro)
@@ -138,5 +171,15 @@ public sealed class AlunoRepository : IAlunoRepository
             status: (StatusAluno)registro.Status,
             responsaveisIds: registro.Responsaveis
                 .Select(vinculo => vinculo.ResponsavelId));
+    }
+
+    public Task<bool> ExisteCpfAsync(
+    Cpf cpf,
+    CancellationToken ct = default)
+    {
+        ArgumentNullException.ThrowIfNull(cpf);
+
+        var hash = _cpfProtector.CalcularHash(cpf);
+        return CpfHashExisteAsync(hash, ct);
     }
 }

@@ -59,4 +59,40 @@ public sealed class ResponsavelRepositoryTests
 
         Assert.Null(resultado);
     }
+
+    [Fact]
+    public async Task Deve_identificar_CPF_de_responsavel_ja_cadastrado()
+    {
+        await _fixture.LimparBancoAsync();
+
+        var protector = TestCpfProtectorFactory.Criar();
+        await using var context = _fixture.CreateContext();
+        var repository = new ResponsavelRepository(context, protector);
+        var cpf = Cpf.Criar("52998224725");
+
+        Assert.False(await repository.ExisteCpfAsync(cpf));
+
+        await repository.AdicionarAsync(
+            Responsavel.Criar("Responsável Teste", cpf));
+
+        Assert.True(await repository.ExisteCpfAsync(cpf));
+    }
+
+    [Fact]
+    public async Task Deve_rejeitar_responsavel_com_CPF_duplicado()
+    {
+        await _fixture.LimparBancoAsync();
+
+        var protector = TestCpfProtectorFactory.Criar();
+        await using var context = _fixture.CreateContext();
+        var repository = new ResponsavelRepository(context, protector);
+        var cpf = Cpf.Criar("52998224725");
+
+        await repository.AdicionarAsync(
+            Responsavel.Criar("Responsável Um", cpf));
+
+        await Assert.ThrowsAsync<DomainException>(
+            () => repository.AdicionarAsync(
+                Responsavel.Criar("Responsável Dois", cpf)));
+    }
 }

@@ -84,4 +84,20 @@ public sealed class AesGcmCpfProtector : ICpfProtector
             CryptographicOperations.ZeroMemory(texto);
         }
     }
+
+    public byte[] CalcularHash(global::Cpf cpf)
+    {
+        ArgumentNullException.ThrowIfNull(cpf);
+
+        var texto = Encoding.UTF8.GetBytes(cpf.Valor);
+
+        try
+        {
+            return HMACSHA256.HashData(_chaveHmac, texto);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(texto);
+        }
+    }
 }
