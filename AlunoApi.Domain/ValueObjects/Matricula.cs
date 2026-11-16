@@ -8,10 +8,15 @@ public sealed record Matricula
 
     private Matricula(int ano, int sequencia) { Ano = ano; Sequencia = sequencia; }
 
+    public const int SequenciaMaxima = 999_999;
+
     public static Matricula Criar(int ano, int sequencia)
     {
         Guard.Against(ano is < 2000 or > 2999, "Ano da matrícula inválido.");
-        Guard.Against(sequencia <= 0, "Sequência da matrícula inválida.");
+        Guard.Against(
+            sequencia is <= 0 or > SequenciaMaxima,
+            "Sequência da matrícula deve estar entre 1 e 999999.");
+
         return new Matricula(ano, sequencia);
     }
 

@@ -22,6 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
+	<ProjectReference Include="..\AlunoApi.Domain\AlunoApi.Domain.csproj" />
     <ProjectReference Include="..\AlunoApi.Infrastructure\AlunoApi.Infrastructure.csproj" />
   </ItemGroup>
     <ItemGroup>

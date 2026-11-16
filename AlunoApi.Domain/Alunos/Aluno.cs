@@ -101,4 +101,42 @@ public sealed class Aluno : AggregateRoot
         Guard.Against(!documento.PossuiRg, "RG é obrigatório para aluno menor de idade.");
         Guard.Against(totalResponsaveis == 0, "Aluno menor de idade exige ao menos um responsável.");
     }
+
+    public static Aluno Reconstituir(
+    Guid id,
+    string nome,
+    DateOnly dataNascimento,
+    Documento documento,
+    Matricula matricula,
+    StatusAluno status,
+    IEnumerable<Guid> responsaveisIds)
+    {
+        Guard.Against(id == Guid.Empty, "Id do aluno inválido.");
+        ArgumentNullException.ThrowIfNull(documento);
+        ArgumentNullException.ThrowIfNull(matricula);
+        ArgumentNullException.ThrowIfNull(responsaveisIds);
+        Guard.Against(
+            !Enum.IsDefined(typeof(StatusAluno), status),
+            "Status do aluno inválido.");
+
+        var ids = responsaveisIds.Distinct().ToArray();
+        Guard.Against(
+            ids.Any(responsavelId => responsavelId == Guid.Empty),
+            "Id de responsável inválido.");
+
+        var aluno = new Aluno
+        {
+            Id = id,
+            Nome = Guard.AgainstNullOrWhiteSpace(nome, "Nome"),
+            DataNascimento = dataNascimento,
+            Documento = documento,
+            Matricula = matricula,
+            Status = status
+        };
+
+        foreach (var responsavelId in ids)
+            aluno._responsaveis.Add(new AlunoResponsavel(id, responsavelId));
+
+        return aluno;
+    }
 }

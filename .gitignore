@@ -15,6 +15,7 @@ coverage/
 # Segredos e ambiente local
 .env
 secrets.json
+/rasc.txt
 
 # Certificados e chaves
 *.pfx

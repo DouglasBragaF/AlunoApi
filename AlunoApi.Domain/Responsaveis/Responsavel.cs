@@ -23,4 +23,17 @@ public sealed class Responsavel : AggregateRoot
         Nome = Guard.AgainstNullOrWhiteSpace(nome, "Nome");
         Cpf = cpf;
     }
+
+    public static Responsavel Reconstituir(Guid id, string nome, Cpf cpf)
+    {
+        Guard.Against(id == Guid.Empty, "Id do responsável inválido.");
+        ArgumentNullException.ThrowIfNull(cpf);
+
+        return new Responsavel
+        {
+            Id = id,
+            Nome = Guard.AgainstNullOrWhiteSpace(nome, "Nome"),
+            Cpf = cpf
+        };
+    }
 }

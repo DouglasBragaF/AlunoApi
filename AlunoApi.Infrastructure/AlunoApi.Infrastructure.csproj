@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AlunoApi.Domain\AlunoApi.Domain.csproj" />
+	<ProjectReference Include="..\AlunoApi.Application\AlunoApi.Application.csproj" />
   </ItemGroup>
 
   <ItemGroup>
