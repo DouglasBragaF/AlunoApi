@@ -3,6 +3,7 @@ using Npgsql;
 using Testcontainers.PostgreSql;
 
 namespace AlunoApi.Tests.Integration.Database;
+using AlunoApi.Infrastructure.Repositories;
 
 public sealed class PostgresDatabaseFixture : IAsyncLifetime
 {
@@ -48,5 +49,20 @@ public sealed class PostgresDatabaseFixture : IAsyncLifetime
             .Options;
 
         return new AppDbContext(options);
+    }
+
+    public async Task LimparBancoAsync()
+    {
+        await using var context = CreateContext();
+
+        await context.Database.ExecuteSqlRawAsync("""
+        TRUNCATE TABLE
+            public.alunos_responsaveis,
+            public.alunos,
+            public.responsaveis,
+            public.usuarios,
+            public.matricula_contadores
+        RESTART IDENTITY CASCADE;
+        """);
     }
 }

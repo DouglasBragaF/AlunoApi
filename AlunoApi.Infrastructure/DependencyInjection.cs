@@ -1,5 +1,6 @@
 ﻿using AlunoApi.Application.Security;
 using AlunoApi.Infrastructure.Security;
+using AlunoApi.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -32,6 +33,8 @@ public static class DependencyInjection
 
         services.AddSingleton<ICpfProtector>(
             new AesGcmCpfProtector(chaveCriptografia, chaveHmac));
+        services.AddScoped<IAlunoRepository, AlunoRepository>();
+        services.AddScoped<IResponsavelRepository, ResponsavelRepository>();
 
         return services;
     }

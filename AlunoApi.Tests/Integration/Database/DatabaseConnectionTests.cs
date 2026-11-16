@@ -27,6 +27,7 @@ public sealed class DatabaseConnectionTests
     public async Task Deve_acessar_as_tabelas_principais()
     {
         await using var context = _fixture.CreateContext();
+        await _fixture.LimparBancoAsync();
 
         Assert.False(await context.Alunos.AnyAsync());
         Assert.False(await context.Responsaveis.AnyAsync());
